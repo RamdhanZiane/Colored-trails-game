@@ -33,10 +33,10 @@ public class GameAgent extends Agent {
             public void action() {
                 ACLMessage msg = receive();
                 if (msg != null && msg.getContent().startsWith("TERMINATE")) {
-                    terminateGame(msg.getContent().split(",")[1]);}
-                // } else {
-                //     block();
-                // }
+                    terminateGame(msg.getContent().split(",")[1]);
+                } else {
+                    block();
+                }
             }
         });
     }
@@ -64,6 +64,7 @@ public class GameAgent extends Agent {
         terminateMsg.addReceiver(new AID("player2", AID.ISLOCALNAME));
         send(terminateMsg);
         System.out.println("Game terminated by " + terminatingAgent);
+        doDelete();
     }
 
     @Override

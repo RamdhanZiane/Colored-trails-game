@@ -29,25 +29,25 @@ public class PlayerAgent extends Agent {
     protected void setup() {
         if(getAID().getLocalName().equals("player1")) {
             tickets = new HashMap<>();
-            tickets.put('A', 5);
-            tickets.put('B', 3);
-            tickets.put('C', 5);
-            tickets.put('D', 5);
-            tickets.put('E', 5);
-            posX = 3;
-            posY = 3;
-            destX = 1;
-            destY = 1;
+            tickets.put('A', 12);
+            tickets.put('B', 9);
+            tickets.put('C', 4);
+            tickets.put('D', 6);
+            tickets.put('E', 8);
+            posX = 0;
+            posY = 0;
+            destX = 4;
+            destY = 4;
             playersList = new String[]{"player2"};
         } else {
             tickets = new HashMap<>();
             tickets.put('A', 5);
             tickets.put('B', 2);
             tickets.put('C', 5);
-            tickets.put('D', 1);
-            tickets.put('E', 0);
-            posX = 4;
-            posY = 1;
+            tickets.put('D', 2);
+            tickets.put('E', 11);
+            posX = 0;
+            posY = 4;
             destX = 3;
             destY = 0;
             playersList = new String[]{"player1"};
@@ -78,10 +78,11 @@ public class PlayerAgent extends Agent {
                     } else if (content.startsWith("UPDATE")) {
                         handleUpdate(msg);
                     } else if (content.startsWith("TERMINATE")) {
+                        System.out.println(getAID().getName() + " received termination message.");
                         doDelete();
                     }
                 } else {
-                    block();
+                    // block();
                 }
             }
         });
@@ -112,9 +113,6 @@ public class PlayerAgent extends Agent {
             send(msg);
         } else {
             ACLMessage offerMsg = new ACLMessage(ACLMessage.PROPOSE);
-            offerMsg.setContent("OFFER," + generateRandomOffer());
-            // offerMsg.addReceiver(new AID("player1", AID.ISLOCALNAME));
-            // offerMsg.addReceiver(new AID("player2", AID.ISLOCALNAME));
             // choose one of the players randomly
             if (stuckCount > 0) {
                 // check if i have any tickets
@@ -126,6 +124,7 @@ public class PlayerAgent extends Agent {
                     }
                 }
                 if (hasTickets) {
+                    offerMsg.setContent("OFFER," + generateRandomOffer());
                     offerMsg.addReceiver(new AID(playersList[rand.nextInt(playersList.length)], AID.ISLOCALNAME));
                     send(offerMsg);
                 }
@@ -220,16 +219,22 @@ public class PlayerAgent extends Agent {
     @Override
     protected void takeDown() {
         int score = calculateScore();
-        System.out.println("Player " + getAID().getName() + " terminating with score: " + score);
+        System.out.println("Player " + getAID().getName() + " at final position: " + "(" + posX + "," + posY + ")" + " terminating with score: " + score);
     }
 
     private int calculateScore() {
         int score = 0;
+        // System.out.println(tickets);
+        // System.out.println((Math.abs(posX - destX) + Math.abs(posY - destY)));
         for (int count : tickets.values()) {
             score += count * 5;
         }
         if (reachedDestination) {
             score += 100;
+        }
+        else{
+            // for each square away from the destination, reduce 10 points
+            score -= 10 * (Math.abs(posX - destX) + Math.abs(posY - destY));
         }
         return score;
     }
